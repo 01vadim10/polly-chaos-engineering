@@ -25,14 +25,14 @@ httpClientBuilder
         options.CircuitBreaker.ShouldHandle = args => args.Outcome switch
         {
             { } outcome when HttpClientResiliencePredicates.IsTransient(outcome) => PredicateResult.True(),
-            { Exception: InvalidOperationException } => PredicateResult.True(),
+            { Exception: IndexOutOfRangeException } => PredicateResult.True(),
             _ => PredicateResult.False()
         };
 
         options.Retry.ShouldHandle = args => args.Outcome switch
         {
             { } outcome when HttpClientResiliencePredicates.IsTransient(outcome) => PredicateResult.True(),
-            { Exception: InvalidOperationException } => PredicateResult.True(),
+            { Exception: IndexOutOfRangeException } => PredicateResult.True(),
             _ => PredicateResult.False()
         };
     });
@@ -52,7 +52,7 @@ httpClientBuilder.AddResilienceHandler("chaos", (builder, context) =>
         {
             EnabledGenerator = args => chaosManager.IsChaosEnabledAsync(args.Context),
             InjectionRateGenerator = args => chaosManager.GetInjectionRateAsync(args.Context),
-            FaultGenerator = new FaultGenerator().AddException(() => new InvalidOperationException("Chaos strategy injection!"))
+            FaultGenerator = new FaultGenerator().AddException(() => new IndexOutOfRangeException("Chaos Fault injection!"))
         })
         .AddChaosOutcome(new ChaosOutcomeStrategyOptions<HttpResponseMessage>
         {
